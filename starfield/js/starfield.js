@@ -24,9 +24,9 @@ function Drawable()
 
 }
  
- var red = "#ff0025";
- var blue = "#2500ff";
- var white = "#ffffff";
+ var red = "#dd0025";
+ var blue = "#2500dd";
+ var white = "#dddddd";
   function Color()
   {
     this.rbgColor = "#ffffff";
@@ -83,7 +83,7 @@ function DrawStars()
 {
   
   context.beginPath();
-  context.fillStyle = "#000000";
+  context.fillStyle = "rgba(0,0,0,0.6)";
   context.rect(0,0,400,400);
   context.fill();
   context.closePath();
@@ -93,7 +93,6 @@ function DrawStars()
   {
     context.beginPath();
     context.rect(stars[i].x - stars[i].size, stars[i].y - stars[i].size, stars[i].size, stars[i].size);
-    //context.fillStyle = "#ffffff";
     context.fillStyle = stars[i].color.rgbColor;
     context.fill();
     context.closePath();
