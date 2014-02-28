@@ -27,7 +27,7 @@ function Color(r, g, b, a)
 	
 	this.getString = function()
 	{
-		return "rgb(" + this.r * 255.0 + "," + this.g * 255.0 + "," + this.b * 255.0 + ")";
+		return "rgb(" + Math.floor(this.r * 255.0) + "," + Math.floor(this.g * 255.0) + "," + Math.floor(this.b * 255.0) + ")";
 	}
 	
 	this.getStringRGBA = function()
@@ -53,5 +53,10 @@ function Color(r, g, b, a)
 		{
 			this.b = 1.0;
 		}
+	}
+	
+	this.print = function()
+	{
+		console.log(this.r +", "+ this.g + ", "+ this.b + ", " + this.a);
 	}
 }

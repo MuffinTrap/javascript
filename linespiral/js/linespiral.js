@@ -140,7 +140,10 @@ Global.getPositionAt = function(position, refOffset)
 			y = Global.canvasHeight - (position - ((Global.canvasWidth * 2) + Global.canvasHeight));
 		}
 		
+	
 	refOffset.x = x;
+	
+		
 	refOffset.y = y;
 }
 
@@ -219,6 +222,7 @@ LineGroup.prototype.draw = function()
 	var c = Global.context;
 	var targetX = 0;
 	var targetY = 0;
+	var targetPosition = 0;
 	
 	c.strokeStyle = this.lineColorStr;
 	
@@ -232,11 +236,16 @@ LineGroup.prototype.draw = function()
 				targetPoint -= this.amountPoints;
 			}
 			
-			
-			Global.getPositionAt(this.linePoints[targetPoint].position + this.targetPositionOffset, 
-								 this.linePoints[i].targetOffset );
+			targetPosition = this.linePoints[targetPoint].position + this.targetPositionOffset;
+			if(isNaN(this.targetPositionOffset))
+			{
+				console.log("ERROR, targetPositionOffset Nan");
+			}
+			Global.getPositionAt(targetPosition, this.linePoints[i].targetOffset );
 			targetX = this.linePoints[i].targetOffset.x;
 			targetY = this.linePoints[i].targetOffset.y;
+			// Nan!
+			//console.log("Drawing" + this.linePoints[i].x + ", " + this.linePoints[i].y + " to " + targetX + "," + targetY);
 			
 			// This also resets the path
 			c.beginPath();
@@ -257,6 +266,7 @@ LineGroup.prototype.update = function(deltaTime)
 	
 	
 	// slow down on oscillation ends
+	
 	if( this.offsetOscillating)
 	{
 		var speed = this.positionOffsetSpeed;
@@ -272,9 +282,11 @@ LineGroup.prototype.update = function(deltaTime)
 			speed = diff * 0.5;
 			speed += diff * 0.1;
 		}
+	
+		this.targetPositionOffset += speed  * deltaTime;
 	}
 	
-	this.targetPositionOffset += speed  * deltaTime;
+	
 	
 	//console.log(this.targetPositionOffset);
 	
@@ -332,10 +344,10 @@ Game.prototype.randomLineGroup = function()
 	{
 		points = 3;
 	}
-	var pointSkip = Math.floor( Math.random() * points); // just to be sure
-	if( pointSkip < 1)
+	var pointSkip =  Math.floor( (points / 4) + Math.random() * (points/2)); // just to be sure
+	if( pointSkip < 1 || pointSkip > points / 2)
 	{
-		pointSkip = 1;
+		pointSkip = Math.floor(points / 4);
 	}
 	var amountTargets = Math.ceil( Math.random() * 5); // just to be sure
 	if( amountTargets < 3)
@@ -389,17 +401,18 @@ Game.prototype.init = function()
 	
 	
 	
-	//this.lineGroups.push( new LineGroup(16, 4, 3, 30, blueColor)); // Whee
+	//this.lineGroups.push( new LineGroup(16, 7, 1, 30, blueColor)); // Whee
 	//this.lineGroups[0].setOffsets( 0, 100, true, -100, 100);
 	//this.lineGroups.push( new LineGroup(24, 10, -60, purpleColor));
 	//this.lineGroups.push( new LineGroup(24, 13, -90, pinkColor));
 	
-	this.lineGroups.push( this.randomLineGroup());
-	this.lineGroups.push( this.randomLineGroup());
-	this.lineGroups.push( this.randomLineGroup());
-	this.lineGroups.push( this.randomLineGroup());
-	this.lineGroups.push( this.randomLineGroup());
-	this.lineGroups.push( this.randomLineGroup());
+	var amount = 1 + Math.floor(Math.random() * 5);
+	while( amount > 0)
+	{
+		this.lineGroups.push( this.randomLineGroup());
+		amount--;
+	}
+	
 	
 	this.amountGroups = this.lineGroups.length;
 	

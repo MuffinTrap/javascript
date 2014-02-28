@@ -3,8 +3,7 @@ body
 	background : #222222;
 }
 h3 {
-	position:relative;
-	left: 30%;
+	
 	color: #aaaaaa;
 }
 a {
@@ -13,15 +12,23 @@ a {
 
 p
 {
-	position:relative;
-
-	left:30%;
+	
 	color: #777777;
 }
-canvas { 
 
-	position:relative;
-	left: 30%;
-	top: 10%;
-	border: 3px dotted white;
+li
+{
+	color: #777777;
 }
+
+b
+{
+	color: #777777;
+}
+
+canvas 
+{ 
+	border: none;
+}
+
+
