@@ -13,7 +13,7 @@
 
 function Ship()
 {
-	this.size = 4;
+	this.size = 8;
 	this.lineWidth = 2;
 	this.color = null;			// Color of the ship
 	this.hitPointColor = null;	// Color of the hitpoint bar
