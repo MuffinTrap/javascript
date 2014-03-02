@@ -4,6 +4,7 @@
 
 
 var Global = new Object();
+Global.canvas = null;
 Global.context = null;
 Global.canvasHeight = 0;
 Global.canvasWidth = 0;
@@ -58,7 +59,7 @@ Global.runGame = function()
 
 function Init()
 {
-  var canvas = document.getElementById("canvas");
+  Global.canvas = document.getElementById("canvas");
   Global.context = canvas.getContext("2d");
   if(Global.context != null)
   {
