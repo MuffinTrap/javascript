@@ -54,13 +54,24 @@ function Ship()
 	this.keyRight = 0;
 	this.keyFire = 0;
 	
-	// Bullets
+	// Bullets and Missiles
 	this.bulletCounter = 0.0;
 	this.bulletInterval = 0.4;
+	this.missileCounter = 0.0;
+	this.missileInterval = 0.6;
+	
 	this.bulletShellEjectSpeed = 3.0;
 	this.bulletPool = null; // Set by game
 	this.particlePool = null; // set by game
-	this.canFire = true;
+	this.missileTriggerTime = 500.0; // in milliseconds
+	
+	this.bulletLoaded = false;
+	this.missileLoaded = false;
+	this.modeBullet = 0;
+	this.modeMissile = 1;
+	this.fireMode = this.modeBullet;
+	this.firePressed = false;
+	
 	
 	// Vertices
 	this.leftPoint = new Vec2(-4.0, 8.0);
@@ -70,6 +81,9 @@ function Ship()
 	this.barrelPoint = new Vec2(0.0, -12.0);
 	
 	this.level = null;
+	this.allShips = null;
+	// id number
+	this.id = 0;
 	
 }
 
@@ -109,15 +123,22 @@ Ship.prototype.setColors = function( shipColor, hitPointColor, hitColor, bulletS
 	console.log("Ship colors "+ this.color + " " + this.hitPointColor + " " + this.hitColor);
 }
 
+Ship.prototype.setID = function(id, shipsArray)
+{
+	this.id = id;
+	this.allShips = shipsArray;
+}
+
 Ship.prototype.setLevel = function(level)
 {
 	this.level = level;
 }
 
-Ship.prototype.setPools = function( bulletPool, particlePool)
+Ship.prototype.setPools = function( bulletPool, particlePool, missilePool)
 {
 	this.bulletPool = bulletPool;
 	this.particlePool = particlePool;
+	this.missilePool = missilePool;
 }
 
 Ship.prototype.randomNewPlace = function()
@@ -184,19 +205,55 @@ Ship.prototype.getInput = function(deltaTime)
 		this.acceleration.clear();
 	}
 	
-	// Shooting
+	// Shooting bullets and missiles
+	var d = new Date();
+	var date = d.getTime();
+	
 	this.bulletCounter += deltaTime;
-	if( KeyListener.keys[this.keyFire] > 0.0 && this.canFire)
+	if(this.bulletCounter >= this.bulletInterval)
 	{
-		if(this.bulletCounter >= this.bulletInterval)
+		this.bulletCounter = 0.0;
+		this.bulletLoaded = true;
+	}
+	
+	this.missileCounter += deltaTime;
+	if(this.missileCounter >= this.missileInterval)
+	{
+		this.missileCounter = 0.0;
+		this.missileLoaded = true;
+	}
+	
+
+	
+	if( KeyListener.keys[this.keyFire] > 0.0 && this.firePressed == false)
+	{
+		this.fireMode = this.modeBullet;
+		this.firePressed = true;
+		//console.log("fire Pressed at " + date);
+	}
+	if( (KeyListener.keys[this.keyFire] > 0.0) && (date - KeyListener.keys[this.keyFire] > this.missileTriggerTime))
+	{
+		//console.log("Missile launch");
+		this.fireMode = this.modeMissile;
+		if(this.missileLoaded)
 		{
-			this.canFire = false;
-			this.shootBullet();
+			this.shootMissile();
+			this.missileCounter = 0.0;
+			this.missileLoaded = false;
 		}
 	}
-	else if( KeyListener.keys[this.keyFire] == 0.0)
+	
+	if( KeyListener.keys[this.keyFire] == 0.0 && this.firePressed == true)
 	{
-		this.canFire = true;
+		//console.log("fire released");
+		
+		if( (this.firePressed && this.fireMode == this.modeBullet) && this.bulletLoaded)
+		{
+			this.shootBullet();
+			this.bulletCounter = 0.0;
+			this.bulletLoaded = false;
+		}
+		this.firePressed = false;
 	}
 }
 
@@ -204,7 +261,7 @@ Ship.prototype.shootBullet = function()
 {
 	var bulletpos = Vec2Add( this.position, Vec2Rotate(this.barrelPoint, this.angle));
 	this.bulletPool.createBullet(bulletpos, this.direction, this.velocity);
-	this.bulletCounter = 0.0;
+	
 	
 	// recoil
 	this.velocity = Vec2Add(this.velocity, Vec2Multiply(this.direction, -this.recoilForce));
@@ -212,7 +269,28 @@ Ship.prototype.shootBullet = function()
 	var right = Vec2Add( this.position, Vec2Rotate(this.rightPoint, this.angle - 1.4));
 	var shellSpawndirection = Vec2Minus(right, this.position);
 	shellSpawndirection.normalize();
-	this.particlePool.createParticle( this.position, shellSpawndirection, this.bulletShellEjectSpeed, this.bulletShellColor);
+	this.particlePool.createParticle( this.position, shellSpawndirection, this.bulletShellEjectSpeed, this.bulletShellColor, 7.0, 3.0, 3.0);
+}
+
+Ship.prototype.getEnemyPosition = function()
+{
+	// FIXME if many players, should find best match
+	
+	if(this.id == 0)
+	{
+		return this.allShips[1].position;
+	}
+	else
+	{
+		return this.allShips[0].position;
+	}
+}
+
+Ship.prototype.shootMissile = function()
+{
+	var bulletpos = Vec2Add( this.position, Vec2Rotate(this.barrelPoint, this.angle));
+	this.missilePool.createMissile(bulletpos, this.direction, this.getEnemyPosition() );
+	
 }
 
 Ship.prototype.explode = function()
@@ -255,6 +333,7 @@ Ship.prototype.getHit = function( bullet )
 	// Affect movement
 	this.velocity.add( Vec2Multiply(bullet.velocity, 0.3));
 	
+	//console.log("Ship got " + bullet.damage + " damage");
 	this.hitPoints -= bullet.damage;
 	this.createSparks(bullet);
 	

@@ -183,3 +183,9 @@ Vec2UnitVector = function(angle)
 	var sn = Math.sin(angle);
 	return new Vec2(cs, sn);
 }
+
+Vec2Dot = function( a, b )
+{
+	return a.x * b.x + a.y * b.y;
+	
+}

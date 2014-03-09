@@ -23,13 +23,15 @@ function Particle()
 
 Particle.prototype = new GameObject();
 
-Particle.prototype.init = function( position, velocity, size, color)
+Particle.prototype.init = function( position, velocity, size, color, gravity, lifetime)
 {
 	this.position.copy(position);
 	this.velocity.copy(velocity);
 	this.size = size;
 	this.color = color;	
 	this.active = true;
+	this.gravityMultiplier = gravity;
+	this.lifeTimeLimit = lifetime;
 }
 
 Particle.prototype.update = function(deltaTime, gravity)
@@ -87,14 +89,14 @@ ParticlePool.prototype.update = function(deltaTime, level)
 	
 }
 
-ParticlePool.prototype.createParticle = function(position, direction, speed, color)
+ParticlePool.prototype.createParticle = function(position, direction, speed, color, gravity, lifetime, size)
 {
 	for(var i = 0; i < this.poolSize; i++)
 	{
 		if(this.particles[i].active == false)
 		{
 			var particle = this.particles[i];						// size
-			particle.init(position, Vec2Multiply(direction, speed), 3.0, color);
+			particle.init(position, Vec2Multiply(direction, speed), size, color, gravity, lifetime);
 			break;
 		}
 	}

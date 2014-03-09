@@ -237,20 +237,26 @@ Camera.prototype.centerOn = function(position)
 	}
 }
 
-Camera.prototype.drawShip = function(ship)
+Camera.prototype.canSeeObject = function(object)
 {
-	var seeShip = false;
+	var seeObject = false;
 	
-	if( ship.position.x > this.position.x && 
-		ship.position.x < this.position.x + this.width)
+	if( object.position.x > this.position.x && 
+		object.position.x < this.position.x + this.width)
 	{
-		if( ship.position.y > this.position.y && 
-			ship.position.y < this.position.y + this.height)
+		if( object.position.y > this.position.y && 
+			object.position.y < this.position.y + this.height)
 		{
-			seeShip = true;
+			seeObject = true;
 		}
 	}
-	if(!seeShip || ship.spawning)
+	return seeObject;
+}
+
+Camera.prototype.drawShip = function(ship)
+{
+	
+	if(!this.canSeeObject(ship) || ship.spawning)
 	{
 		return;
 	}
@@ -309,23 +315,10 @@ Camera.prototype.drawHitPoints = function(ship)
 
 Camera.prototype.drawBullet = function(bullet)
 {
-	var seeShip = false;
-	
-	if( bullet.position.x > this.position.x && 
-		bullet.position.x < this.position.x + this.width)
-	{
-		if( bullet.position.y > this.position.y && 
-			bullet.position.y < this.position.y + this.height)
-		{
-			seeShip = true;
-		}
-	}
-	if(!seeShip)
+	if(!this.canSeeObject(bullet))
 	{
 		return;
 	}
-	
-	
 	
 	
 	//console.log("Drawing bullet");
@@ -362,22 +355,11 @@ Camera.prototype.drawBulletPool = function(bulletPool)
 
 Camera.prototype.drawParticle = function(particle)
 {
-	var seeShip = false;
 	
-	if( particle.position.x > this.position.x && 
-		particle.position.x < this.position.x + this.width)
-	{
-		if( particle.position.y > this.position.y && 
-			particle.position.y < this.position.y + this.height)
-		{
-			seeShip = true;
-		}
-	}
-	if(!seeShip)
+	if(!this.canSeeObject(particle))
 	{
 		return;
 	}
-	
 	
 	var c = Global.context;
 	var particlePosition = Vec2Minus(particle.position, this.position);
@@ -398,6 +380,70 @@ Camera.prototype.drawParticlePool = function(particlePool)
 		if( particlePool.particles[i].active)
 		{
 			this.drawParticle(particlePool.particles[i]);		
+		}
+	}	
+}
+
+Camera.prototype.drawMissile = function(missile)
+{
+	if(!this.canSeeObject(missile))
+	{
+		return;
+	}
+	
+	//console.log("Drawing missile");
+	var c = Global.context;
+	var missilePosition = Vec2Minus(missile.position, this.position);
+	missilePosition.add(this.drawStart);
+	c.strokeStyle = "#ffff66";
+	c.fillStyle = "#ff00ff";
+
+	if(missile.state == missile.stateSeeking || missile.state == missile.stateDropped)
+	{
+		c.fillStyle = "#ff00ff";
+		c.fillRect(missilePosition.x, missilePosition.y, missile.drawSize, missile.drawSize);	
+	}
+	else if(missile.state == missile.stateExplosion)
+	{
+		
+		c.fillStyle = "rgba(0.7, 0.5, 0.1, 0.5)";
+		var amount = Math.ceil(Math.random() * 10);
+		for(var i = 0; i < amount; i++)
+		{
+			px = 20.0 - Math.random() * 40.0;
+			py = 20.0 - Math.random() * 40.0;
+			
+			c.fillRect(missilePosition.x + px, missilePosition.y + py, missile.size, missile.size);
+		}
+		// draw explosion
+		
+		
+	}
+	
+	/*
+		c.lineWidth = missile.size;
+		c.beginPath();
+		var direction = missile.direction;
+			//direction.print();
+		direction.mul(missile.size );
+		c.moveTo( missilePosition.x + direction.x, missilePosition.y + direction.y);
+		c.lineTo( missilePosition.x - direction.x, missilePosition.y - direction.y);
+		c.stroke();
+		
+		// draw yellow tail
+		c.strokeStyle = "ffff00";
+		c.lineTo(missilePosition.x - direction.x * 2, missilePosition.y - direction.y * 2);
+		c.stroke();
+		*/
+}
+
+Camera.prototype.drawMissilePool = function(missilePool)
+{
+	for(var i = 0; i < missilePool.poolSize; i++)
+	{
+		if( missilePool.particles[i].active)
+		{
+			this.drawMissile(missilePool.particles[i]);		
 		}
 	}	
 }
@@ -483,7 +529,7 @@ Camera.prototype.drawBackground = function(backgroundstars)
 /* Draw what this camera sees on the canvas
  * starting from startX and startY
  * */
-Camera.prototype.draw = function(backgroundstars)
+Camera.prototype.draw = function(backgroundstars, ships, amountShips)
 {
 	// Move everything so that they are related to
 	// cameras position
@@ -493,11 +539,11 @@ Camera.prototype.draw = function(backgroundstars)
 	
 	this.drawBackground(backgroundstars);
 	
-	// Ship One
-	this.drawShip(Global.game.shipOne);
-
-	// Ship Two
-	this.drawShip(Global.game.shipTwo);
+	for(var s = 0; s < amountShips; s++)
+	{
+		
+		this.drawShip(ships[s]);
+	}
 	
 	
 	
@@ -511,13 +557,20 @@ Camera.prototype.draw = function(backgroundstars)
 function Game()
 {
 	// Set game variables
-	this.shipOne = new Ship();
-	this.shipTwo = new Ship();
+	this.ships = [];
+	this.amountShips = 2;
+	for(var i = 0; i < this.amountShips; i++)
+	{
+		this.ships.push(new Ship());
+	}
+	
+	
 	this.shipOnePos = new Vec2(200,100);
 	this.shipTwoPos = new Vec2(350,100);
 	
 	this.bulletPool = new BulletPool(20);
-	this.particlePool = new ParticlePool(40);
+	this.particlePool = new ParticlePool(400);
+	this.missilePool = new MissilePool(30, this.particlePool);
 	
 	this.cameraOne = new Camera(400,400, 0, 0);
 	this.cameraTwo = new Camera(400,400, Global.canvasWidth/2, 0);
@@ -539,35 +592,38 @@ Game.prototype.init = function()
 {
 	// Init all game objects
 	
-	this.shipOne.init( this.shipOnePos,
+	this.ships[0].init( this.shipOnePos,
 						KeyListener.Key_W, KeyListener.Key_A, KeyListener.Key_D,
 						KeyListener.Key_Q );
 
-	this.shipOne.setColors( this.colorOne.getString(), 
+	this.ships[0].setColors( this.colorOne.getString(), 
 							this.colorOne.getStringRGBA(), 
 							this.shipHitColor,
 							this.bulletShellColor);
 	
-	this.shipOne.setPools(this.bulletPool, this.particlePool);
-	
-	this.shipOne.setLevel(this.level);
 	
 	
-	this.shipTwo.init( this.shipTwoPos, 
+	this.ships[1].init( this.shipTwoPos, 
 						KeyListener.Key_I, KeyListener.Key_J, KeyListener.Key_L,
 						KeyListener.Key_B);
-	this.shipTwo.setLevel(this.level);
+	
 				
-	this.shipTwo.setColors( this.colorTwo.getString(), 
+	this.ships[1].setColors( this.colorTwo.getString(), 
 							this.colorTwo.getStringRGBA(), 
 							this.shipHitColor,
 							this.bulletShellColor);
 							
-	this.shipTwo.setPools(this.bulletPool, this.particlePool);
 	
+	for(var s = 0; s < this.amountShips; s++)
+	{
+		
+		this.ships[s].setPools(this.bulletPool, this.particlePool, this.missilePool);
+		this.ships[s].setLevel(this.level);
+		this.ships[s].setID(s, this.ships);
+	}
 	
-	this.cameraOne.followShip(this.shipOne);
-	this.cameraTwo.followShip(this.shipTwo);
+	this.cameraOne.followShip(this.ships[0]);
+	this.cameraTwo.followShip(this.ships[1]);
 	
 	KeyListener.setCanvas(Global.canvas);
 }
@@ -578,14 +634,22 @@ Game.prototype.update = function(deltaTime)
 {
 	// Take input
 	// Update all objects
-	this.shipOne.update(deltaTime, this.level);
-	this.shipTwo.update(deltaTime, this.level);
+	for(var s = 0; s < this.amountShips; s++)
+	{
+		this.ships[s].update(deltaTime, this.level);
+	}
 	this.bulletPool.update(deltaTime, this.level);
 	this.particlePool.update(deltaTime, this.level);
+	this.missilePool.update(deltaTime, this.level);
 	
 	this.bulletPool.checkCollisionWithLevel(this.level);
-	this.bulletPool.checkCollisionWithShip(this.shipOne);
-	this.bulletPool.checkCollisionWithShip(this.shipTwo);
+	this.missilePool.checkCollisions(this.ships, this.amountShips);
+	
+	for(var s = 0; s < this.amountShips; s++)
+	{
+		this.bulletPool.checkCollisionWithShip(this.ships[s]);
+	}
+	
 	
 	
 	this.cameraOne.update(deltaTime);
@@ -598,11 +662,11 @@ Game.prototype.draw = function()
 	Global.context.beginPath();
 	Global.context.fillRect(0,0, Global.canvasWidth, Global.canvasHeight);
 	
-	this.cameraOne.drawHitPoints(this.shipOne);
-	this.cameraOne.draw(this.background);
+	this.cameraOne.drawHitPoints(this.ships[0]);
+	this.cameraOne.draw(this.background, this.ships, this.amountShips);
 	
-	this.cameraTwo.drawHitPoints(this.shipTwo);
-	this.cameraTwo.draw(this.background);
+	this.cameraTwo.drawHitPoints(this.ships[1]);
+	this.cameraTwo.draw(this.background, this.ships, this.amountShips);
 	
 	this.cameraOne.drawBulletPool(this.bulletPool);
 	this.cameraTwo.drawBulletPool(this.bulletPool);
@@ -610,6 +674,9 @@ Game.prototype.draw = function()
 	this.cameraOne.drawParticlePool(this.particlePool);
 	this.cameraTwo.drawParticlePool(this.particlePool);
 	
+	
+	this.cameraOne.drawMissilePool(this.missilePool);
+	this.cameraTwo.drawMissilePool(this.missilePool);
 	
 }
 

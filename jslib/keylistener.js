@@ -48,6 +48,7 @@ KeyListener.keyUpHandler = function(event)
 	// Clear the time to 0.0 which is also false
 	if(KeyListener.keys[event.keyCode] > 0.0)
 	{
+		//console.log("Key " + String.fromCharCode(event.keyCode) + " released");
 		KeyListener.keys[event.keyCode] = 0.0;
 	}
 }
