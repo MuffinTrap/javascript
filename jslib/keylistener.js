@@ -74,5 +74,17 @@ KeyListener.setCanvas = function(canvas)
 	
 }
 
+KeyListener.isKeyDown = function(keycode)
+{
+	if( KeyListener.keys[keycode] > 0.0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 document.addEventListener("keydown", KeyListener.keyDownHandler, false);
 document.addEventListener("keyup", KeyListener.keyUpHandler, false);

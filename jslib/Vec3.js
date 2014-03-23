@@ -47,3 +47,15 @@ function Vec3Minus(a,b)
 	return new Vec3( a.x - b.x, a.y - b.y, a.z - b.z);
 	
 }
+
+Vec3.prototype.copy = function(otherVec3)
+{
+	this.x = otherVec3.x;
+	this.y = otherVec3.y;
+	this.z = otherVec3.z;
+}
+
+Vec3.prototype.print = function()
+{
+	console.log("x: " + this.x + " y: " + this.y + " z: " + this.z);
+}

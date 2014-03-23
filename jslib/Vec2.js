@@ -12,10 +12,17 @@ function Vec2(x,y)
 	}
 }
 
+
 Vec2.prototype.add = function( b )
 {
 	this.x += b.x;
 	this.y += b.y;
+}
+
+Vec2.prototype.addDelta = function( b, deltaTime)
+{
+	this.x += b.x * deltaTime;
+	this.y += b.y * deltaTime;
 }
 
 function Vec2Add( a, b)
