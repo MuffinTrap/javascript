@@ -158,12 +158,12 @@ Ship.prototype.collisionWithLevel = function(level)
 Ship.prototype.getInput = function(deltaTime)
 {
 	var turn = false;
-	if( KeyListener.keys[this.keyLeft] > 0.0)
+	if( KeyListener.keys[this.keyLeft.code] > 0.0)
 	{
 		this.angle -= this.turnSpeed * deltaTime;
 		turn = true;
 	}
-	else if( KeyListener.keys[this.keyRight] > 0.0)
+	else if( KeyListener.keys[this.keyRight.code] > 0.0)
 	{
 		this.angle += this.turnSpeed * deltaTime;
 		turn = true;
@@ -189,7 +189,7 @@ Ship.prototype.getInput = function(deltaTime)
 	
 	
 	var boost = false;
-	if( KeyListener.keys[this.keyForward] > 0.0)
+	if( KeyListener.keys[this.keyForward.code] > 0.0)
 	{
 		boost = true;
 		this.speed += this.speedIncrease * deltaTime;
@@ -225,13 +225,13 @@ Ship.prototype.getInput = function(deltaTime)
 	
 
 	
-	if( KeyListener.keys[this.keyFire] > 0.0 && this.firePressed == false)
+	if( KeyListener.keys[this.keyFire.code] > 0.0 && this.firePressed == false)
 	{
 		this.fireMode = this.modeBullet;
 		this.firePressed = true;
 		//console.log("fire Pressed at " + date);
 	}
-	if( (KeyListener.keys[this.keyFire] > 0.0) && (date - KeyListener.keys[this.keyFire] > this.missileTriggerTime))
+	if( (KeyListener.keys[this.keyFire.code] > 0.0) && (date - KeyListener.keys[this.keyFire.code] > this.missileTriggerTime))
 	{
 		//console.log("Missile launch");
 		this.fireMode = this.modeMissile;
@@ -243,7 +243,7 @@ Ship.prototype.getInput = function(deltaTime)
 		}
 	}
 	
-	if( KeyListener.keys[this.keyFire] == 0.0 && this.firePressed == true)
+	if( KeyListener.keys[this.keyFire.code] == 0.0 && this.firePressed == true)
 	{
 		//console.log("fire released");
 		
