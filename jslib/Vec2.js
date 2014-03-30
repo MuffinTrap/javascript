@@ -196,3 +196,26 @@ Vec2Dot = function( a, b )
 	return a.x * b.x + a.y * b.y;
 	
 }
+
+// Interpolation functions
+
+// Linear
+Vec2RefLerp = function(ref, from, to, progress)
+{
+	ref.x = from.x + (to.x - from.x) * progress;
+	ref.y = from.y + (to.y - from.y) * progress;
+}
+
+// Quadratic
+Vec2RefQuerp = function(ref, from, to, progress)
+{
+	ref.x = from.x + (to.x - from.x) * progress * progress;
+	ref.y = from.y + (to.y - from.y) * progress * progress;
+}
+
+// Quadratic out
+Vec2RefQuerpOut = function(ref, from, to, progress)
+{
+	ref.x = from.x - (to.x - from.x) * progress * (progress - 2);
+	ref.y = from.y - (to.y - from.y) * progress * (progress - 2);
+}

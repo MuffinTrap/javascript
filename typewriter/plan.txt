@@ -1,0 +1,27 @@
+Typewriter plan
+
+make a key with letter a
+place it on screen
+when a is pressed, key a flies to grid first
+a is printed
+key a flies back to start point
+
+Sunday plans :
+add sounds for
+	button down
+	button up
+	key arrives
+	key goes down
+	character written
+	key goes up
+	key is back home
+
+	enter is pressed
+	backspace is pressed
+	new line is reached
+	
+animate caret
+add background noise lines
+add shadow to keys?
+
+! Separate character input and caret movement

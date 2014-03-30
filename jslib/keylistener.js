@@ -1,28 +1,85 @@
 /* Keylistener singleton class thingie */
 
+// code : int
+// key  : 1 letter string
+function Key(code, key)
+{
+	this.code = code;
+	this.key = key;
+}
+
 var KeyListener = new Object();
-KeyListener.Key_LeftArrow 	= 37;
-KeyListener.Key_UpArrow 	= 38;
-KeyListener.Key_RightArrow 	= 39;
-KeyListener.Key_DownArrow 	= 40;
-
-KeyListener.Key_I 	= 73;
-KeyListener.Key_J	= 74;
-KeyListener.Key_K 	= 75;
-KeyListener.Key_L 	= 76;
-KeyListener.Key_B 	= 66;
 
 
-KeyListener.Key_W 	= 87;
-KeyListener.Key_A	= 65;
-KeyListener.Key_S 	= 83;
-KeyListener.Key_D 	= 68;
-KeyListener.Key_TAB = 9;
 
-KeyListener.Key_Q = 81;
-
+KeyListener.keyEnums = [];
 KeyListener.keys = [];
+KeyListener.keysRead = [];
 KeyListener.canvas = null;
+
+KeyListener.AddKey = function(code, key)
+{
+	KeyListener.keyEnums.push(new Key(code, key));
+	KeyListener.initKey( KeyListener.keyEnums[ KeyListener.keyEnums.length-1 ] );
+	return KeyListener.keyEnums[ KeyListener.keyEnums.length-1 ];
+}
+
+KeyListener.initKey = function(keycode)
+{
+	//console.log("KeyListener init of key " + keycode.code +" : " + keycode.key);
+	KeyListener.keys[keycode.code] 	= 0.0;
+	KeyListener.keysRead[keycode] = false;
+}
+
+KeyListener.Key_LeftArrow 	= KeyListener.AddKey(37, 'leftArrow');
+KeyListener.Key_UpArrow 	= KeyListener.AddKey(38, 'upArrow');
+KeyListener.Key_RightArrow 	= KeyListener.AddKey(39, 'rightArrow');
+KeyListener.Key_DownArrow 	= KeyListener.AddKey(40, 'downArrow');
+
+
+KeyListener.Key_TAB = KeyListener.AddKey(9, 'tab');
+
+KeyListener.Key_Q 	= KeyListener.AddKey(81, 'q');
+KeyListener.Key_W 	= KeyListener.AddKey(87, 'w');
+KeyListener.Key_E 	= KeyListener.AddKey(69, 'e');
+KeyListener.Key_R 	= KeyListener.AddKey(82, 'r');
+KeyListener.Key_T 	= KeyListener.AddKey(84, 't');
+KeyListener.Key_Y 	= KeyListener.AddKey(89, 'y');
+KeyListener.Key_U 	= KeyListener.AddKey(85, 'u');
+KeyListener.Key_I 	= KeyListener.AddKey(73, 'i');
+KeyListener.Key_O 	= KeyListener.AddKey(79, 'o');
+KeyListener.Key_P 	= KeyListener.AddKey(80, 'p');
+
+KeyListener.Key_A	= KeyListener.AddKey(65, 'a');
+KeyListener.Key_S 	= KeyListener.AddKey(83, 's');
+KeyListener.Key_D 	= KeyListener.AddKey(68, 'd');
+
+KeyListener.Key_F	= KeyListener.AddKey(70, 'f');
+KeyListener.Key_G 	= KeyListener.AddKey(71, 'g');
+KeyListener.Key_H  	= KeyListener.AddKey(72, 'h');
+
+KeyListener.Key_J	= KeyListener.AddKey(74, 'j');
+KeyListener.Key_K 	= KeyListener.AddKey(75, 'k');
+KeyListener.Key_L 	= KeyListener.AddKey(76, 'l');
+
+KeyListener.Key_Z	= KeyListener.AddKey(90, 'z');
+KeyListener.Key_X 	= KeyListener.AddKey(88, 'x');
+KeyListener.Key_C 	= KeyListener.AddKey(67, 'c');
+
+KeyListener.Key_V	= KeyListener.AddKey(86, 'v');
+KeyListener.Key_B 	= KeyListener.AddKey(66, 'b');
+KeyListener.Key_N 	= KeyListener.AddKey(78, 'n');
+
+KeyListener.Key_M 	= KeyListener.AddKey(77, 'm');
+
+
+KeyListener.Key_COMMA 	= KeyListener.AddKey(188, ',');
+KeyListener.Key_STOP 	= KeyListener.AddKey(190, '.');
+
+KeyListener.Key_SPACE 	= KeyListener.AddKey(32, ' ');
+KeyListener.Key_ENTER 	= KeyListener.AddKey(312, 'enter');
+KeyListener.Key_BACKSPACE 	= KeyListener.AddKey(8, 'backspace');
+
 
 KeyListener.keyDown = function(event)
 {
@@ -39,6 +96,7 @@ KeyListener.keyDown = function(event)
 KeyListener.keyDownHandler = function(event)
 {
 	KeyListener.keyDown(event);
+	return false;
 }
 
 
@@ -53,10 +111,7 @@ KeyListener.keyUpHandler = function(event)
 	}
 }
 
-KeyListener.initKey = function(keycode)
-{
-	KeyListener.keys[keycode] 	= 0.0;
-}
+
 
 KeyListener.setCanvas = function(canvas)
 {
@@ -76,7 +131,7 @@ KeyListener.setCanvas = function(canvas)
 
 KeyListener.isKeyDown = function(keycode)
 {
-	if( KeyListener.keys[keycode] > 0.0)
+	if( KeyListener.keys[keycode.code] > 0.0)
 	{
 		return true;
 	}
@@ -85,6 +140,41 @@ KeyListener.isKeyDown = function(keycode)
 		return false;
 	}
 }
+
+
+KeyListener.isKeyPressed = function(keycode)
+{
+	return KeyListener.keysRead[keycode.code];	
+}
+
+
+// used by game to differentiate between keypresses
+KeyListener.setKeyRead = function(keycode)
+{
+	KeyListener.keysRead[keycode.code] = true;
+}
+
+KeyListener.setKeyUnRead = function(keycode)
+{
+	KeyListener.keysRead[keycode.code] = false;
+}
+
+KeyListener.getKeyCode = function(keystring)
+{
+	var amountKeys = KeyListener.keyEnums.length;
+	for( var i = 0; i < amountKeys; i++)
+	{
+		if( KeyListener.keyEnums[i].key == keystring)
+		{
+			//console.log("KeyListener returning keyEnum code " + KeyListener.keyEnums[i].code +" for " + keystring);
+			return KeyListener.keyEnums[i];
+		}
+	}
+	console.error("No such key");
+	return 0;
+	
+}
+
 
 document.addEventListener("keydown", KeyListener.keyDownHandler, false);
 document.addEventListener("keyup", KeyListener.keyUpHandler, false);
